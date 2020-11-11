@@ -1,16 +1,42 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect, useCallback } from "react";
 import IngredientForm from "./IngredientForm";
 import Search from "./Search";
 import IngredientList from "./IngredientList";
+
 const Ingredients = (props) => {
   const [ingredientsState, setIngredientsState] = useState([]);
+
+  useEffect(() => {
+    console.log("RENDERING INGREDIENTS", ingredientsState);
+  }, [ingredientsState]);
+
+  const searchIngredientsHandler = useCallback((searchResult) => {
+    setIngredientsState(searchResult);
+  }, []);
+
   const addIngredientHandler = (ingredient) => {
-    setIngredientsState((prevIngredientsState) => [
-      ...prevIngredientsState,
-      { id: Math.random().toString(), ...ingredient },
-    ]);
+    //browser function
+    //will send a http request
+    //by default will be a GET request
+    fetch(
+      "https://react-hooks-practice-740b5.firebaseio.com/ingredients.json",
+      {
+        method: "POST",
+        body: JSON.stringify(ingredient),
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((responseData) => {
+        setIngredientsState((prevIngredientsState) => [
+          ...prevIngredientsState,
+          { id: responseData.name, ...ingredient },
+        ]);
+      });
   };
+
   const removeIntgredientHandler = (ingredientId) => {
     setIngredientsState((prevIngredientsState) =>
       prevIngredientsState.filter(
@@ -22,9 +48,8 @@ const Ingredients = (props) => {
   return (
     <div className="App">
       <IngredientForm onAddIngredient={addIngredientHandler} />
-
       <section>
-        <Search />
+        <Search onLoadIngredients={searchIngredientsHandler} />
         <IngredientList
           ingredients={ingredientsState}
           onRemoveItem={removeIntgredientHandler}
