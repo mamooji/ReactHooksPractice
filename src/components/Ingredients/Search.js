@@ -10,7 +10,7 @@ const Search = React.memo((props) => {
   const inputRef = useRef();
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (enteredSearch === inputRef.current.value) {
         const query =
           enteredSearch.length === 0
@@ -39,6 +39,9 @@ const Search = React.memo((props) => {
           });
       }
     }, 500);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [enteredSearch, onLoadIngredients, inputRef]);
 
   return (
